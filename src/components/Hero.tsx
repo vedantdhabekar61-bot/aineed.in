@@ -10,11 +10,11 @@ interface HeroProps {
 }
 
 const TIPS = [
-  "I want to create marketing emails...",
-  "How can I generate code for a website?",
-  "I need a logo for my coffee shop...",
-  "Summarize this 50-page PDF...",
-  "Create a voiceover for my video...",
+  "marketing",
+  "coding",
+  "images",
+  "video",
+  "productivity",
 ];
 
 const Hero: React.FC<HeroProps> = ({ onSearch, isSearching, session, onOpenAuth }) => {
@@ -59,17 +59,17 @@ const Hero: React.FC<HeroProps> = ({ onSearch, isSearching, session, onOpenAuth 
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div className="inline-flex items-center px-4 py-1.5 rounded-full border border-indigo-100 bg-white/50 backdrop-blur-sm text-indigo-700 text-xs font-semibold mb-8 shadow-sm ring-1 ring-white/50">
             <Sparkles className="w-3.5 h-3.5 mr-2 text-indigo-500 fill-indigo-100" />
-            Powered by Gemini 2.0 Flash
+            V2.0 Database
             </div>
         </div>
 
         <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight text-slate-900 mb-6 max-w-4xl animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100">
           Find the perfect <br/>
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 animate-gradient">AI Tool</span> for any task.
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 animate-gradient">Tool</span> for any task.
         </h1>
         
         <p className="max-w-2xl text-lg sm:text-xl text-slate-500 mb-12 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
-          Describe your workflow, problem, or idea in plain English. We'll instantly match you with the best tools from our curated database.
+          Search our curated database of the best tools to help you get work done faster.
         </p>
 
         <div className="w-full max-w-2xl relative group animate-in fade-in slide-in-from-bottom-10 duration-700 delay-300">
@@ -90,7 +90,7 @@ const Hero: React.FC<HeroProps> = ({ onSearch, isSearching, session, onOpenAuth 
                         onKeyDown={handleKeyDown}
                         onFocus={() => setIsFocused(true)}
                         onBlur={() => setIsFocused(false)}
-                        placeholder="Describe what you want to do..."
+                        placeholder="Search for tools..."
                         className="w-full bg-transparent text-slate-900 placeholder-slate-400 pl-14 pr-6 py-5 text-lg focus:outline-none resize-none min-h-[120px] rounded-t-3xl"
                     />
                 </div>
@@ -128,12 +128,12 @@ const Hero: React.FC<HeroProps> = ({ onSearch, isSearching, session, onOpenAuth 
                           {isSearching ? (
                               <>
                                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                  Thinking...
+                                  Searching...
                               </>
                           ) : (
                               <>
                                   <Search className="w-4 h-4 mr-2" />
-                                  Find Tools
+                                  Search
                               </>
                           )}
                       </button>
