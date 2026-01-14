@@ -40,8 +40,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         if (error) throw error;
         onClose();
       }
-    } catch (err: any) {
-      setError(err.message || 'An error occurred');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unexpected error occurred');
+      }
     } finally {
       setLoading(false);
     }

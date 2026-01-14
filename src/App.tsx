@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Session } from '@supabase/supabase-js';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import ToolGrid from './components/ToolGrid';
@@ -13,8 +14,8 @@ const App: React.FC = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [lastQuery, setLastQuery] = useState<string>('');
   
-  // Auth State
-  const [session, setSession] = useState<any>(null);
+  // Auth State - Strictly typed
+  const [session, setSession] = useState<Session | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   useEffect(() => {

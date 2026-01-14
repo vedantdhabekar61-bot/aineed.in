@@ -1,10 +1,11 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Search, Loader2, Sparkles, Lock, Command } from 'lucide-react';
+import { Session } from '@supabase/supabase-js';
 
 interface HeroProps {
   onSearch: (query: string) => void;
   isSearching: boolean;
-  session: any;
+  session: Session | null;
   onOpenAuth: () => void;
 }
 

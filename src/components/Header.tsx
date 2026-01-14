@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Sparkles, Github, LogOut, User } from 'lucide-react';
+import { Session } from '@supabase/supabase-js';
 import { supabase } from '../services/supabase';
 
 interface HeaderProps {
-  session: any;
+  session: Session | null;
   onOpenAuth: () => void;
 }
 
