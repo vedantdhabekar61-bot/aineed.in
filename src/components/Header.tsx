@@ -37,7 +37,7 @@ const Header: React.FC<HeaderProps> = ({ session, onOpenAuth }) => {
             <Sparkles className="w-5 h-5 text-indigo-400" />
           </div>
           <span className="text-xl font-bold text-slate-900 tracking-tight">
-            AiFinder
+            aineed.in
           </span>
         </div>
         

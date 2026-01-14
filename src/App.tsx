@@ -76,7 +76,7 @@ const App: React.FC = () => {
 
       <footer className="border-t border-slate-200 mt-20 py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4 text-center text-slate-500 text-sm">
-          <p>&copy; {new Date().getFullYear()} AiFinder. Powered by Google Gemini.</p>
+          <p>&copy; {new Date().getFullYear()} aineed.in. All rights reserved.</p>
         </div>
       </footer>
 
