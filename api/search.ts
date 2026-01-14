@@ -1,8 +1,8 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
+// Fix: Use process.env.API_KEY as per coding guidelines
 // Initialize Gemini Client with the secure server-side key
-const apiKey = process.env.GEMINI_API_KEY;
-const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export default async function handler(req: any, res: any) {
   // Only allow POST requests
@@ -16,8 +16,8 @@ export default async function handler(req: any, res: any) {
     return res.status(400).json({ error: 'Invalid query provided' });
   }
 
-  if (!ai) {
-    console.error("GEMINI_API_KEY is missing on the server.");
+  if (!process.env.API_KEY) {
+    console.error("API_KEY is missing on the server.");
     return res.status(500).json({ error: 'Server configuration error' });
   }
 
