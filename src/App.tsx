@@ -14,17 +14,15 @@ const App: React.FC = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [lastQuery, setLastQuery] = useState<string>('');
   
-  // Auth State - Strictly typed
+  // Auth State
   const [session, setSession] = useState<Session | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   useEffect(() => {
-    // Check active session on load
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
     });
 
-    // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -47,6 +45,7 @@ const App: React.FC = () => {
       setTools(results);
     } catch (error) {
       console.error("Search failed", error);
+      // In case of error, we could show a toast, but keeping the current tools or empty state is safer for now.
     } finally {
       setIsSearching(false);
     }

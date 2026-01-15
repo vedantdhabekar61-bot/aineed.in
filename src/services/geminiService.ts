@@ -7,30 +7,41 @@ export const searchAiTools = async (userQuery: string): Promise<AiTool[]> => {
   }
 
   try {
-    // Call the serverless function
-    // encodeURIComponent is crucial to handle special characters in the query
-    const response = await fetch(`/api/search?q=${encodeURIComponent(userQuery)}`);
+    // Check if we are in development (localhost) vs production
+    // Vercel serverless functions are at /api/...
+    // Locally with Vite, this path doesn't exist unless proxied or using `vercel dev`
+    const apiUrl = `/api/search?q=${encodeURIComponent(userQuery)}`;
+    
+    const response = await fetch(apiUrl);
 
     if (!response.ok) {
-      throw new Error(`API error: ${response.statusText}`);
+      // Try to get error details
+      const errorData = await response.json().catch(() => ({}));
+      console.error("Server Error:", response.status, response.statusText, errorData);
+      throw new Error(errorData.error || `Server error: ${response.status}`);
     }
 
-    const data: AiTool[] = await response.json();
+    const data = await response.json();
     
-    // Fallback to initial tools if API returns empty array (rare but possible)
     if (!Array.isArray(data) || data.length === 0) {
+      console.warn("API returned empty array or invalid format, using fallback.");
       return INITIAL_TOOLS;
     }
 
     return data;
   } catch (error) {
-    console.error("Search service failed:", error);
-    // Graceful fallback to local filtering if the API fails
+    console.error("Search failed, using local fallback.", error);
+    
+    // Fallback logic for local development or API failure
     const lowerQuery = userQuery.toLowerCase();
-    return INITIAL_TOOLS.filter(tool => 
+    const results = INITIAL_TOOLS.filter(tool => 
       tool.name.toLowerCase().includes(lowerQuery) || 
       tool.description.toLowerCase().includes(lowerQuery) ||
       tool.category.toLowerCase().includes(lowerQuery)
     );
+    
+    // If fallback finds nothing, stick to initial tools (or could return empty)
+    // Returning empty allows the UI to show "No results found" which is more accurate than showing everything.
+    return results; 
   }
 };

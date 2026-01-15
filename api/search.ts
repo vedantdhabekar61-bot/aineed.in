@@ -1,11 +1,15 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
-// Vercel Serverless Function Handler
 export default async function handler(req: any, res: any) {
-  // Allow simple CORS for development/production flexibility
+  // CORS setup
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
-  
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  );
+
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;
@@ -19,14 +23,13 @@ export default async function handler(req: any, res: any) {
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    console.error("GEMINI_API_KEY is missing in environment variables.");
-    return res.status(500).json({ error: "Server configuration error" });
+    console.error("GEMINI_API_KEY is missing.");
+    return res.status(500).json({ error: "Server configuration error: API Key missing" });
   }
 
   try {
     const ai = new GoogleGenAI({ apiKey });
     
-    // Define the expected JSON structure for the AI response
     const toolSchema = {
       type: Type.ARRAY,
       items: {
@@ -43,36 +46,46 @@ export default async function handler(req: any, res: any) {
 
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: `The user is searching for: "${q}". 
+      contents: `User search query: "${q}". 
       
-      Return a list of 5 to 8 REAL, existing AI tools that perfectly match this request. 
-      For each tool, provide:
-      1. A unique string ID.
-      2. The correct name.
-      3. A short, punchy description (max 120 chars).
-      4. A relevant category (e.g., 'Copywriting', 'Video Gen', 'Coding').
-      5. The actual homepage URL.
+      Generate a curated list of 5-8 highly relevant, real-world AI tools that match this query.
+      If the query is vague, provide popular general AI tools.
       
-      Ensure the tools are popular and reliable.`,
+      Requirements:
+      - IDs must be unique strings.
+      - Descriptions should be concise and benefit-focused.
+      - URLs must be valid homepages.
+      `,
       config: {
-        systemInstruction: "You are an expert AI tool finder.",
+        systemInstruction: "You are an intelligent search engine for AI software.",
         responseMimeType: "application/json",
         responseSchema: toolSchema,
-        temperature: 0.7,
+        temperature: 0.5, 
       },
     });
 
-    // Handle the response
     const text = response.text;
+    
     if (!text) {
-      throw new Error("Empty response from AI");
+      console.error("Gemini returned empty text.");
+      return res.status(500).json({ error: "AI returned no content" });
     }
 
-    const tools = JSON.parse(text);
+    // Clean Markdown formatting if present (e.g. ```json ... ```)
+    const cleanedText = text.replace(/```json\n?|```/g, '').trim();
+
+    let tools;
+    try {
+      tools = JSON.parse(cleanedText);
+    } catch (parseError) {
+      console.error("JSON Parse Error:", parseError, "Raw text:", text);
+      return res.status(500).json({ error: "Failed to parse AI response" });
+    }
+
     return res.status(200).json(tools);
 
   } catch (error: any) {
-    console.error("Gemini API Error:", error);
-    return res.status(500).json({ error: "Failed to fetch AI recommendations" });
+    console.error("Gemini API Error:", error.message, error.stack);
+    return res.status(500).json({ error: "Internal AI Error", details: error.message });
   }
 }
