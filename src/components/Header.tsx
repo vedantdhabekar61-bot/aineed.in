@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Sparkles, Github, LogOut, User } from 'lucide-react';
-import { Session } from '@supabase/supabase-js';
 import { supabase } from '../services/supabase';
 
 interface HeaderProps {
-  session: Session | null;
+  session: any | null;
   onOpenAuth: () => void;
 }
 
@@ -12,9 +11,7 @@ const Header: React.FC<HeaderProps> = ({ session, onOpenAuth }) => {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 10);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -27,12 +24,15 @@ const Header: React.FC<HeaderProps> = ({ session, onOpenAuth }) => {
     <header 
       className={`fixed w-full top-0 z-50 transition-all duration-300 ${
         scrolled 
-          ? 'bg-white/70 backdrop-blur-xl border-b border-white/20 shadow-sm' 
+          ? 'bg-white/80 backdrop-blur-xl border-b border-white/20 shadow-sm' 
           : 'bg-transparent border-b border-transparent'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-        <div className="flex items-center space-x-3 cursor-pointer group">
+        <div 
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="flex items-center space-x-3 cursor-pointer group"
+        >
           <div className="bg-slate-900 p-2 rounded-xl shadow-lg shadow-indigo-500/20 group-hover:shadow-indigo-500/40 transition-all duration-300">
             <Sparkles className="w-5 h-5 text-indigo-400" />
           </div>
@@ -41,29 +41,22 @@ const Header: React.FC<HeaderProps> = ({ session, onOpenAuth }) => {
           </span>
         </div>
         
-        <nav className="hidden md:flex items-center space-x-8">
-          {['Categories', 'Latest Tools', 'Submit'].map((item) => (
-            <a 
-              key={item}
-              href="#" 
-              className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
-            >
-              {item}
-            </a>
-          ))}
-        </nav>
-
         <div className="flex items-center space-x-4">
-           <button className="text-slate-400 hover:text-slate-900 transition-colors hidden sm:block p-2 hover:bg-slate-100 rounded-full">
+           <a 
+             href="https://github.com" 
+             target="_blank" 
+             rel="noopener noreferrer"
+             className="text-slate-400 hover:text-slate-900 transition-colors hidden sm:block p-2 hover:bg-slate-100 rounded-full"
+           >
               <Github className="w-5 h-5" />
-           </button>
+           </a>
            
            <div className="h-6 w-px bg-slate-200 hidden sm:block"></div>
 
            {session ? (
              <button 
                onClick={handleSignOut}
-               className="flex items-center space-x-2 text-sm font-medium text-slate-600 hover:text-red-600 transition-colors px-4 py-2 rounded-full hover:bg-slate-50 border border-transparent"
+               className="flex items-center space-x-2 text-sm font-medium text-slate-600 hover:text-red-600 transition-colors px-4 py-2 rounded-full hover:bg-slate-50"
              >
                 <LogOut className="w-4 h-4" />
                 <span>Sign Out</span>

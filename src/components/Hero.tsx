@@ -1,21 +1,14 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Search, Loader2, Sparkles, Lock, Command } from 'lucide-react';
-import { Session } from '@supabase/supabase-js';
 
 interface HeroProps {
   onSearch: (query: string) => void;
   isSearching: boolean;
-  session: Session | null;
+  session: any | null;
   onOpenAuth: () => void;
 }
 
-const TIPS = [
-  "marketing",
-  "coding",
-  "images",
-  "video",
-  "productivity",
-];
+const TIPS = ["marketing", "coding", "images", "video", "productivity"];
 
 const Hero: React.FC<HeroProps> = ({ onSearch, isSearching, session, onOpenAuth }) => {
   const [localQuery, setLocalQuery] = useState('');
@@ -41,39 +34,34 @@ const Hero: React.FC<HeroProps> = ({ onSearch, isSearching, session, onOpenAuth 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      if (session && localQuery.trim()) {
-        onSearch(localQuery);
-      } else if (!session) {
-        onOpenAuth();
-      }
+      handleSubmit(e);
     }
-  }, [localQuery, onSearch, session, onOpenAuth]);
+  }, [handleSubmit]);
 
   return (
     <section className="relative pt-32 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col items-center text-center overflow-hidden">
-        {/* Mesh Background Effects */}
+        {/* Animated Background Mesh */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-indigo-100/50 blur-[100px] rounded-full -z-20 pointer-events-none opacity-60 mix-blend-multiply" />
         <div className="absolute top-10 left-1/3 w-[500px] h-[500px] bg-purple-100/40 blur-[90px] rounded-full -z-20 pointer-events-none opacity-50 mix-blend-multiply" />
         <div className="absolute top-20 right-1/4 w-[400px] h-[400px] bg-pink-100/40 blur-[80px] rounded-full -z-20 pointer-events-none opacity-50 mix-blend-multiply" />
 
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="animate-[fade-in_1s_ease-out]">
             <div className="inline-flex items-center px-4 py-1.5 rounded-full border border-indigo-100 bg-white/50 backdrop-blur-sm text-indigo-700 text-xs font-semibold mb-8 shadow-sm ring-1 ring-white/50">
             <Sparkles className="w-3.5 h-3.5 mr-2 text-indigo-500 fill-indigo-100" />
-            V2.0 Database
+            AI Tool Database
             </div>
         </div>
 
-        <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight text-slate-900 mb-6 max-w-4xl animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100">
+        <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight text-slate-900 mb-6 max-w-4xl animate-[fade-in_1s_ease-out_0.2s_both]">
           Find the perfect <br/>
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 animate-gradient">Tool</span> for any task.
         </h1>
         
-        <p className="max-w-2xl text-lg sm:text-xl text-slate-500 mb-12 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
+        <p className="max-w-2xl text-lg sm:text-xl text-slate-500 mb-12 animate-[fade-in_1s_ease-out_0.4s_both]">
           Search our curated database of the best tools to help you get work done faster.
         </p>
 
-        <div className="w-full max-w-2xl relative group animate-in fade-in slide-in-from-bottom-10 duration-700 delay-300">
-            
+        <div className="w-full max-w-2xl relative group animate-[fade-in_1s_ease-out_0.6s_both]">
             <form onSubmit={handleSubmit} 
                 className={`
                     relative bg-white rounded-3xl transition-all duration-300
@@ -90,7 +78,7 @@ const Hero: React.FC<HeroProps> = ({ onSearch, isSearching, session, onOpenAuth 
                         onKeyDown={handleKeyDown}
                         onFocus={() => setIsFocused(true)}
                         onBlur={() => setIsFocused(false)}
-                        placeholder="Search for tools..."
+                        placeholder="Describe what you want to do..."
                         className="w-full bg-transparent text-slate-900 placeholder-slate-400 pl-14 pr-6 py-5 text-lg focus:outline-none resize-none min-h-[120px] rounded-t-3xl"
                     />
                 </div>

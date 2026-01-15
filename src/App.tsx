@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Session } from '@supabase/supabase-js';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import ToolGrid from './components/ToolGrid';
@@ -13,19 +12,15 @@ const App: React.FC = () => {
   const [tools, setTools] = useState<AiTool[]>(INITIAL_TOOLS);
   const [isSearching, setIsSearching] = useState(false);
   const [lastQuery, setLastQuery] = useState<string>('');
-  
-  // Auth State
-  const [session, setSession] = useState<Session | null>(null);
+  const [session, setSession] = useState<any | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }: any) => {
       setSession(session);
     });
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
       setSession(session);
     });
 
@@ -45,20 +40,19 @@ const App: React.FC = () => {
       setTools(results);
     } catch (error) {
       console.error("Search failed", error);
-      // In case of error, we could show a toast, but keeping the current tools or empty state is safer for now.
     } finally {
       setIsSearching(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-900">
+    <div className="min-h-screen flex flex-col">
       <Header 
         session={session} 
         onOpenAuth={() => setIsAuthModalOpen(true)} 
       />
       
-      <main>
+      <main className="flex-grow">
         <Hero 
           onSearch={handleSearch} 
           isSearching={isSearching} 
@@ -69,7 +63,7 @@ const App: React.FC = () => {
         <ToolGrid 
             tools={tools} 
             loading={isSearching}
-            title={lastQuery ? `Results for "${lastQuery.length > 40 ? lastQuery.substring(0, 40) + '...' : lastQuery}"` : "Popular AI Tools"} 
+            title={lastQuery ? `Results for "${lastQuery}"` : "Popular AI Tools"} 
         />
       </main>
 

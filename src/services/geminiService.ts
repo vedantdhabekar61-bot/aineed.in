@@ -7,32 +7,27 @@ export const searchAiTools = async (userQuery: string): Promise<AiTool[]> => {
   }
 
   try {
-    // Check if we are in development (localhost) vs production
-    // Vercel serverless functions are at /api/...
-    // Locally with Vite, this path doesn't exist unless proxied or using `vercel dev`
+    // Determine API URL (relative for Vercel, absolute for dev if needed)
     const apiUrl = `/api/search?q=${encodeURIComponent(userQuery)}`;
     
     const response = await fetch(apiUrl);
 
     if (!response.ok) {
-      // Try to get error details
-      const errorData = await response.json().catch(() => ({}));
-      console.error("Server Error:", response.status, response.statusText, errorData);
-      throw new Error(errorData.error || `Server error: ${response.status}`);
+      throw new Error(`Server returned ${response.status}`);
     }
 
     const data = await response.json();
     
     if (!Array.isArray(data) || data.length === 0) {
-      console.warn("API returned empty array or invalid format, using fallback.");
+      console.warn("API returned empty data, using fallback");
       return INITIAL_TOOLS;
     }
 
     return data;
   } catch (error) {
-    console.error("Search failed, using local fallback.", error);
+    console.error("Search Service Error:", error);
     
-    // Fallback logic for local development or API failure
+    // Client-side fallback for demo/offline/error purposes
     const lowerQuery = userQuery.toLowerCase();
     const results = INITIAL_TOOLS.filter(tool => 
       tool.name.toLowerCase().includes(lowerQuery) || 
@@ -40,8 +35,6 @@ export const searchAiTools = async (userQuery: string): Promise<AiTool[]> => {
       tool.category.toLowerCase().includes(lowerQuery)
     );
     
-    // If fallback finds nothing, stick to initial tools (or could return empty)
-    // Returning empty allows the UI to show "No results found" which is more accurate than showing everything.
     return results; 
   }
 };
