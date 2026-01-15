@@ -1,23 +1,36 @@
 import { AiTool } from '../types';
 import { INITIAL_TOOLS } from '../constants';
 
-// Local search simulation to replace backend API dependency
 export const searchAiTools = async (userQuery: string): Promise<AiTool[]> => {
-  // Simulate network latency for a realistic feel
-  await new Promise(resolve => setTimeout(resolve, 600));
-
   if (!userQuery.trim()) {
     return INITIAL_TOOLS;
   }
 
-  const lowerQuery = userQuery.toLowerCase();
-  
-  // Perform local search against existing database
-  const results = INITIAL_TOOLS.filter(tool => 
-    tool.name.toLowerCase().includes(lowerQuery) || 
-    tool.description.toLowerCase().includes(lowerQuery) ||
-    tool.category.toLowerCase().includes(lowerQuery)
-  );
+  try {
+    // Call the serverless function
+    // encodeURIComponent is crucial to handle special characters in the query
+    const response = await fetch(`/api/search?q=${encodeURIComponent(userQuery)}`);
 
-  return results.length > 0 ? results : INITIAL_TOOLS;
+    if (!response.ok) {
+      throw new Error(`API error: ${response.statusText}`);
+    }
+
+    const data: AiTool[] = await response.json();
+    
+    // Fallback to initial tools if API returns empty array (rare but possible)
+    if (!Array.isArray(data) || data.length === 0) {
+      return INITIAL_TOOLS;
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Search service failed:", error);
+    // Graceful fallback to local filtering if the API fails
+    const lowerQuery = userQuery.toLowerCase();
+    return INITIAL_TOOLS.filter(tool => 
+      tool.name.toLowerCase().includes(lowerQuery) || 
+      tool.description.toLowerCase().includes(lowerQuery) ||
+      tool.category.toLowerCase().includes(lowerQuery)
+    );
+  }
 };
