@@ -1,55 +1,75 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-export default async function handler(req, res) {
-  // 1. Setup CORS (allows your frontend to talk to this backend)
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  );
-
-  // Handle preflight request
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-
-  // 2. Get the search query from the request
-  const { query } = req.query || req.body;
-
-  if (!query) {
-    return res.status(400).json({ error: "Search query is required" });
+export default async function handler(
+  req: VercelRequest,
+  res: VercelResponse
+) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    // 3. Initialize Gemini
-    // MAKE SURE to set GEMINI_API_KEY in your Vercel Environment Variables
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const { query } = req.body;
 
-    // 4. Create a prompt for Gemini
-    // We ask it to return a JSON list of AI tools based on the user's search
-    const prompt = `You are an expert AI finder. The user is searching for: "${query}".
-    List 5 best AI tools relevant to this search.
-    Return the response ONLY in valid JSON format like this:
-    [
-      { "name": "Tool Name", "description": "Short description", "link": "https://..." }
-    ]
-    Do not add markdown formatting like \`\`\`json. Just the raw JSON array.`;
+    if (!query || query.trim() === '') {
+      return res.status(400).json({ error: 'Query is required' });
+    }
 
-    const result = await model.generateContent(prompt);
-    const responseText = result.response.text();
+    const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-    // 5. Clean up the response and send it back to frontend
-    // Sometimes Gemini adds markdown code blocks, we strip them just in case
-    const cleanedJson = responseText.replace(/```json/g, "").replace(/```/g, "").trim();
-    
-    return res.status(200).json(JSON.parse(cleanedJson));
+    if (!GEMINI_API_KEY) {
+      return res.status(500).json({ error: 'Gemini API key missing' });
+    }
 
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text: `
+You are an AI tool search engine.
+User is searching for AI tools.
+
+Search query: "${query}"
+
+Return results in JSON array format:
+[
+  {
+    "name": "",
+    "description": "",
+    "category": "",
+    "url": ""
+  }
+]
+
+Return only JSON.`
+                }
+              ]
+            }
+          ]
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    const text =
+      data?.candidates?.[0]?.content?.parts?.[0]?.text || '[]';
+
+    let tools;
+    try {
+      tools = JSON.parse(text);
+    } catch {
+      tools = [];
+    }
+
+    return res.status(200).json({ tools });
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    return res.status(500).json({ error: "Failed to fetch results from Gemini" });
+    return res.status(500).json({ error: 'Gemini request failed' });
   }
 }
